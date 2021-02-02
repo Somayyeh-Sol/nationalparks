@@ -1,29 +1,111 @@
 import React ,{useEffect, useState} from "react";
 import axios from 'axios';
+import { format, formatDistance, formatRelative, subDays,toDate } from 'date-fns';
+import Grid from "@material-ui/core/Grid";
+import GridList from '@material-ui/core/GridList';
+import Typography from "@material-ui/core/Typography";
+import Divider from "@material-ui/core/Divider";
+import Card from "@material-ui/core/Card";
+import CardActionArea from "@material-ui/core/CardActionArea";
+import CardMedia from "@material-ui/core/CardMedia";
+import CardContent from "@material-ui/core/CardContent";
+import CardActions from "@material-ui/core/CardActions";
+import Button from "@material-ui/core/Button";
+import { makeStyles } from '@material-ui/core/styles';
 
 
-export default function Weather() {
+const useStyles = makeStyles({
+    root: {
+        maxWidth: 345,
+    },
+    media: {
+        height: 140,
+    },
+});
+export default function Weather(){
 
+    const classes = useStyles();
+
+    const initialWeather = {
+        current:{},
+        daily:[]
+    }
  
-   const [weatherData,setWeatherData] = useState({});
+   const [weatherData,setWeatherData] = useState(initialWeather);
 
-  const loadStateData=(event)=>{
-     
-      axios.get(`https://api.openweathermap.org/data/2.5/onecall?appid=1a2e16938d4b79024deb982b1a47ef40&lat=-33.869629&lon=151.206955&exclude=minutely,hourly&units=metric`)
-      .then(
-        (response)=>{
-            setWeatherData(response.data);
-            console.log(response.data);
-        }
-    )
-    .catch(
-        error => {
-             console.log(error.response.data);
+    useEffect(()=>{
+        axios.get(`https://api.openweathermap.org/data/2.5/onecall?appid=1a2e16938d4b79024deb982b1a47ef40&lat=-33.869629&lon=151.206955&exclude=minutely,hourly&units=metric`)
+            .then(response =>
+                    setWeatherData(response.data)
+            ).catch(
+                error =>
+                    console.log(error.response.data)
+                );
+    }, []);
 
-        });
-      }
+    return(
+        <div style={ { padding:20}}>
+            {/*<p>{JSON.stringify(weatherData)}</p>*/}
+            <div className="header" style={{backgroundColor:'lightblue'}}>
+            <Grid container spacing={3}>
+                <Grid item xs={6} md={3} lg={3}>
+                    <Typography gutterBottom variant="subtitle1">
+                        <strong>lat: </strong>{weatherData.lat}
+                    </Typography>
+                </Grid>
+                <Grid item xs={6} md={3} lg={3}>
+                    <strong>lon: </strong>{weatherData.lon}
+                </Grid>
+                <Grid item xs={6} md={3} lg={3}>
+                    <strong>timezone: </strong>{weatherData.timezone}
+                </Grid>
+                <Grid item xs={6} md={3} lg={3}>
+                    <p>current: </p><p>{toDate(weatherData.current.dt*1000).toString()}</p>
+                </Grid>
+                <Grid item xs={6} md={3} lg={3}>
+                    <p>humidinty: </p><p>{weatherData.current.humidity}</p>
+                </Grid>
+           </Grid>
+           </div>
+            <Divider />
+            <GridList cellHeight={260} className={classes.gridList} cols={3}>
+            {weatherData.daily.map(item =>
+                <Card className={classes.root}>
+                <CardActionArea>
+                    <CardMedia
+                        className={classes.media}
+                        image="/static/images/cards/contemplative-reptile.jpg"
+                        title="Contemplative Reptile"
+                    />
+                    <CardContent>
+                        <Typography gutterBottom variant="h6" component="h6">
+                            Date Time: {toDate(item.dt*1000).toDateString()}
+                        </Typography>
+                        <Typography gutterBottom variant="h5" component="h2">
+                            pressure: {item.pressure}
+                        </Typography>
+                        <Typography gutterBottom variant="h5" component="h2">
+                        humidity: {item.humidity}
+                    </Typography>
+                        <Typography gutterBottom variant="h6" component="h6">
+                            rain: {item.rain}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" component="p">
+
+                        </Typography>
+                    </CardContent>
+                </CardActionArea>
+                <CardActions>
+                    <Button size="small" color="primary">
+                        More detail
+                    </Button>
+                </CardActions>
+            </Card>)}
+            </GridList>
+        </div>
+);
   
-
+/*
   return (
     <div >
         <div className="App-header">
@@ -116,7 +198,7 @@ export default function Weather() {
 
       </div>
    
-  );
+  );*/
 }
 
 
